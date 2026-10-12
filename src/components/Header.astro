@@ -1,0 +1,25 @@
+---
+import { ui, type Lang } from '../data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+const home = lang === 'es' ? '/es/' : '/';
+const other = lang === 'es' ? '/' : '/es/';
+const otherLang = lang === 'es' ? 'en' : 'es';
+---
+
+<a class="skip" href="#main">{lang === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
+<header class="top">
+  <a class="mark" href={home} aria-label={t.homeLabel}>
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="none" stroke="currentColor" stroke-width="5"></circle></svg>
+    Nouh Khouyi
+  </a>
+  <nav aria-label={t.navLabel}>
+    <a href="#work">{t.nav.work}</a>
+    <a href="#experience">{t.nav.experience}</a>
+    <a href="#about">{t.nav.about}</a>
+    <a href="#contact">{t.nav.contact}</a>
+    <a class="lang" href={other} hreflang={otherLang} lang={otherLang} aria-label={t.switchLabel}>{t.switchShort}</a>
+  </nav>
+</header>

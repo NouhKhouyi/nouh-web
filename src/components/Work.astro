@@ -1,0 +1,148 @@
+---
+import { ui, GITHUB, type Lang } from '../data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+
+const C = {
+  en: {
+    andiTitle: 'Anomalous Diffusion for Financial Regime Detection',
+    andiMeta: ['Jan – May 2026', 'Co-authored, team of 6', 'PyTorch, MLflow, Streamlit'],
+    andiBody: [
+      'We treated market prices as particles moving through a medium and asked when their diffusion regime changes. A multi-task Conv1D + BiLSTM network, trained on 100k synthetic trajectories, locates the changepoint and classifies the regime at the same time.',
+      'On S&P 500, IBEX 35 and crypto data it matched 12 of 15 known stress events, up to 45 days early. A Bayesian uncertainty layer turns each detection into a credible interval and a cost-sensitive action, so a person reviews the output instead of trusting a bare score.',
+    ],
+    andiNote: 'Code private. Paper in preparation.',
+    barsLabel: 'Changepoint error in days: our model 16.85, XGBoost baseline 40.99',
+    ours: 'Our model', base: 'XGBoost baseline', days: 'days', v1: '16.85', v2: '40.99',
+    barsCap: 'Changepoint RMSE in days, lower is better. Bars share one scale.',
+    eventsLabel: '12 of 15 stress events detected',
+    eventsCap: ['12 of 15', 'market stress events matched early. Regime accuracy', '85.5%'],
+    decisions: ['Alert', 'Review', 'Ignore'],
+    decisionLabel: 'Decision layer outcomes',
+    decisionCap: 'Each detection maps to one action, weighted by the cost of being wrong.',
+    ragTitle: 'Retrieval system for tier-1 banks',
+    ragBody: "I own this system end to end as the only technical lead and the client's point of contact. In banking every answer has to be traceable to a source document, so evaluation is built into the pipeline from the start.",
+    ragSteps: ['Ingestion', 'Indexing', 'Retrieval', 'LLM orchestration', 'Evaluation', 'Integration'],
+    ragLabel: 'System pipeline',
+    urbMeta: ['2025', 'Project lead, team of 4', 'Samsung Innovation Campus'],
+    urbBody: 'Neighbours and community gardens report problems on Telegram, by text or voice. Whisper transcribes, Gemma (via Ollama) extracts the who, where and how urgent, and the result lands in Supabase and a Neo4j graph as tasks with owners.',
+    urbStat: [['0.89', 'macro-F1, noise filter']],
+    code: 'Code on GitHub',
+    soilTitle: 'The Secret Beneath the Soil',
+    soilMeta: ['2025', 'Real sensor data from Agro4Data, under NDA'],
+    soilBody: 'We went looking for real, messy data. Field sensors plus AEMET and SIAR weather records gave us five-day soil-moisture forecasts, showing a farm could run fewer sensors.',
+    soilStat: [['3.07', 'RMSE, Random Forest'], ['0.80', 'NSE at 5 days'], ['0.96', 'AUC, optimal state']],
+    minor: [
+      ['MomentumLife', 'A habit design and tracking app with real-time visualisation. React and Supabase.', '2025'],
+      ['Automations', 'AutoReservas, a Telegram booking bot, and a UPV gym booking script with requests and Selenium. Notifications and credentials kept out of the code.', '2024 – 25'],
+    ],
+  },
+  es: {
+    andiTitle: 'Difusión anómala para detectar regímenes financieros',
+    andiMeta: ['Ene – May 2026', 'Coautor, equipo de 6', 'PyTorch, MLflow, Streamlit'],
+    andiBody: [
+      'Tratamos los precios de mercado como partículas que se mueven por un medio y nos preguntamos cuándo cambia su régimen de difusión. Una red multitarea Conv1D + BiLSTM, entrenada con 100k trayectorias sintéticas, localiza el punto de cambio y clasifica el régimen a la vez.',
+      'Con datos del S&P 500, el IBEX 35 y criptomonedas detectó 12 de 15 episodios de estrés conocidos, hasta 45 días antes. Una capa bayesiana de incertidumbre convierte cada detección en un intervalo creíble y en una acción sensible al coste, para que una persona revise el resultado en lugar de fiarse de una puntuación sin más.',
+    ],
+    andiNote: 'Código privado. Artículo en preparación.',
+    barsLabel: 'Error del punto de cambio en días: nuestro modelo 16,85, baseline XGBoost 40,99',
+    ours: 'Nuestro modelo', base: 'Baseline XGBoost', days: 'días', v1: '16,85', v2: '40,99',
+    barsCap: 'RMSE del punto de cambio en días; cuanto menor, mejor. Ambas barras usan la misma escala.',
+    eventsLabel: '12 de 15 episodios de estrés detectados',
+    eventsCap: ['12 de 15', 'episodios de estrés detectados con antelación. Precisión de régimen', '85,5 %'],
+    decisions: ['Alertar', 'Revisar', 'Ignorar'],
+    decisionLabel: 'Resultados de la capa de decisión',
+    decisionCap: 'Cada detección lleva a una acción, ponderada por el coste de equivocarse.',
+    ragTitle: 'Sistema de recuperación de información para bancos tier-1',
+    ragBody: 'Soy responsable de este sistema de principio a fin, como único líder técnico y contacto con el cliente. En banca cada respuesta tiene que poder trazarse hasta un documento fuente, así que la evaluación forma parte del pipeline desde el principio.',
+    ragSteps: ['Ingesta', 'Indexado', 'Recuperación', 'Orquestación LLM', 'Evaluación', 'Integración'],
+    ragLabel: 'Pipeline del sistema',
+    urbMeta: ['2025', 'Jefe de proyecto, equipo de 4', 'Samsung Innovation Campus'],
+    urbBody: 'Vecinos y huertos urbanos avisan de problemas por Telegram, en texto o por voz. Whisper transcribe, Gemma (vía Ollama) extrae quién, dónde y con qué urgencia, y el resultado llega a Supabase y a un grafo en Neo4j como tareas con responsable.',
+    urbStat: [['0,89', 'macro-F1, filtro de ruido']],
+    code: 'Código en GitHub',
+    soilTitle: 'El secreto bajo la tierra',
+    soilMeta: ['2025', 'Datos reales de sensores de Agro4Data, bajo NDA'],
+    soilBody: 'Buscábamos datos reales, con sus huecos y su ruido. Sensores de campo junto con registros meteorológicos de AEMET y SIAR nos dieron previsiones de humedad del suelo a cinco días, y mostraron que una finca podría funcionar con menos sensores.',
+    soilStat: [['3,07', 'RMSE, Random Forest'], ['0,80', 'NSE a 5 días'], ['0,96', 'AUC, estado óptimo']],
+    minor: [
+      ['MomentumLife', 'Una app para diseñar y seguir hábitos, con visualización en tiempo real. React y Supabase.', '2025'],
+      ['Automatizaciones', 'AutoReservas, un bot de reservas en Telegram, y un script de reservas para el gimnasio de la UPV con requests y Selenium. Notificaciones incluidas y credenciales fuera del código.', '2024 – 25'],
+    ],
+  },
+}[lang];
+---
+
+<section class="block" id="work" aria-labelledby="work-h">
+  <div class="head">
+    <h2 id="work-h">{t.workTitle}</h2>
+    <p>{t.workIntro}</p>
+  </div>
+
+  <article class="lead">
+    <div>
+      <h3>{C.andiTitle}</h3>
+      <div class="meta">{C.andiMeta.map((m, i) => <span class={i === 0 ? 'num' : undefined}>{m}</span>)}</div>
+      <div class="body">
+        {C.andiBody.map((p) => <p>{p}</p>)}
+        <p class="note">{C.andiNote}</p>
+      </div>
+    </div>
+    <div class="fig">
+      <figure>
+        <svg viewBox="0 0 360 104" role="img" aria-label={C.barsLabel}>
+          <text class="lbl" x="0" y="14">{C.ours}</text>
+          <rect class="bar-ai" x="0" y="22" width="122.8" height="18" rx="3"></rect>
+          <text class="val" x="130.8" y="36">{C.v1} {C.days}</text>
+          <text class="lbl" x="0" y="66">{C.base}</text>
+          <rect class="bar-base" x="0" y="74" width="298.8" height="18" rx="3"></rect>
+          <text class="val" x="306.8" y="88">{C.v2}</text>
+        </svg>
+        <figcaption>{C.barsCap}</figcaption>
+      </figure>
+      <figure>
+        <ul class="events" aria-label={C.eventsLabel}>
+          {Array.from({ length: 15 }, (_, i) => <li class={i < 12 ? 'hit' : undefined}></li>)}
+        </ul>
+        <figcaption><b class="num">{C.eventsCap[0]}</b> {C.eventsCap[1]} <b class="num">{C.eventsCap[2]}</b>.</figcaption>
+      </figure>
+      <figure>
+        <div class="decision" aria-label={C.decisionLabel}>{C.decisions.map((d) => <span>{d}</span>)}</div>
+        <figcaption>{C.decisionCap}</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <article class="route">
+    <div class="body">
+      <h3>{C.ragTitle}</h3>
+      <div class="meta"><span>GPTadvisor</span><span class="num">2026</span></div>
+      <p>{C.ragBody}</p>
+    </div>
+    <ol aria-label={C.ragLabel}>
+      {C.ragSteps.map((s) => <li>{s}</li>)}
+    </ol>
+  </article>
+
+  <div class="pair">
+    <article>
+      <h3>UrbanAI</h3>
+      <div class="meta">{C.urbMeta.map((m, i) => <span class={i === 0 ? 'num' : undefined}>{m}</span>)}</div>
+      <p>{C.urbBody}</p>
+      <div class="stat">{C.urbStat.map(([v, l]) => <div><b>{v}</b><span>{l}</span></div>)}</div>
+      <p><a href={GITHUB}>{C.code}</a></p>
+    </article>
+    <article>
+      <h3>{C.soilTitle}</h3>
+      <div class="meta">{C.soilMeta.map((m, i) => <span class={i === 0 ? 'num' : undefined}>{m}</span>)}</div>
+      <p>{C.soilBody}</p>
+      <div class="stat">{C.soilStat.map(([v, l]) => <div><b>{v}</b><span>{l}</span></div>)}</div>
+    </article>
+  </div>
+
+  <ul class="minor">
+    {C.minor.map(([h, p, y]) => <li><h3>{h}</h3><p>{p}</p><span class="yr">{y}</span></li>)}
+  </ul>
+</section>

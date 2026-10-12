@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui } from '../data/site';
+
+const en = ui.en;
+const es = ui.es;
+---
+
+<Base lang="en" title="404 | Nouh Khouyi Etbar" noindex>
+  <div class="wrap">
+    <main class="lost" id="main">
+      <h1>{en.notFoundTitle}</h1>
+      <p>{en.notFoundText} <a href="/">{en.notFoundLink}</a></p>
+      <p lang="es">{es.notFoundText} <a href="/es/">{es.notFoundLink}</a></p>
+    </main>
+  </div>
+</Base>

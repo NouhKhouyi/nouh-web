@@ -1,0 +1,148 @@
+---
+// The hero network map. Rendered fully at build time (works without JS);
+// the client script only adds station selection and moves the board.
+import { ui, stations, ORDER, PATHS, type Lang, type LineKey, type Station } from '../data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = ui[lang];
+const S = stations(lang);
+const DEFAULT = 'gpt';
+const lineOf = (s: Station) => (s.kind === 'x' ? 'x' : s.line || s.lines[0]);
+const radius = (id: string, s: Station) => (s.kind === 'x' ? (id === 'upv' ? 15 : 12) : 8);
+const ids = Object.keys(S);
+const lineKeys: LineKey[] = ['ai', 'mob', 'com'];
+const sel = S[DEFAULT];
+---
+
+<div class="map" id="map">
+  <svg viewBox="40 36 990 310" role="group" aria-label={t.mapLabel}>
+    <path d="M830 120 L890 60 L960 60" class="ln ext"></path>
+    {PATHS.map(([k, d]) => <path d={d} class={`ln ${k}`} pathLength="1"></path>)}
+    {ids.map((id, i) => {
+      const s = S[id];
+      const r = radius(id, s);
+      const [dx, dy, anchor] = s.lbl;
+      return (
+        <g class={`st ${lineOf(s)}${id === DEFAULT ? ' on' : ''}`} tabindex="0" role="button" data-id={id}
+           aria-label={`${s.n}, ${s.d}`} aria-pressed={id === DEFAULT ? 'true' : 'false'} style={`--i:${i}`}>
+          <circle class="hit" cx={s.x} cy={s.y} r="24"></circle>
+          <circle class="ring" cx={s.x} cy={s.y} r={r + 8}></circle>
+          <circle class="dot" cx={s.x} cy={s.y} r={r}></circle>
+          <text class="nm" x={s.x + dx} y={s.y + dy} text-anchor={anchor}>{s.n}</text>
+          <text class="dt" x={s.x + dx} y={s.y + dy + 18} text-anchor={anchor}>{s.short || s.d}</text>
+        </g>
+      );
+    })}
+    <text class="hint" x="960" y="132" text-anchor="middle">{t.underConstruction}</text>
+  </svg>
+</div>
+
+<div class="strips" id="strips">
+  <div class="strip origin-strip">
+    <ol>
+      <li class="x" data-id="upv">
+        <button type="button" class="stop" data-id="upv" aria-expanded="false"><b>{S.upv.n}</b><span>{S.upv.d}</span><i>{t.originNote}</i></button>
+      </li>
+    </ol>
+  </div>
+  {lineKeys.map((k) => (
+    <div class={`strip ${k}`}>
+      <h3><span class={`chip ${k}`}><span class="chip-t">{t.lines[k]}</span></span></h3>
+      <ol>
+        {ORDER[k].map((id) => {
+          const s = S[id];
+          const extra = s.extra?.[k];
+          return (
+            <li class={[s.kind === 'x' && 'x', s.kind === 'ext' && 'ext'].filter(Boolean).join(' ')} data-id={id}>
+              <button type="button" class="stop" data-id={id} aria-expanded="false"><b>{s.n}</b><span>{s.d}</span>{extra && <i>{extra}</i>}</button>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  ))}
+</div>
+
+<div id="boardSlot">
+  <article class="board" aria-live="polite">
+    <div>
+      <div class="lines">{sel.lines.map((k) => <span class={`chip ${k}`}><span class="chip-t">{t.lines[k]}</span></span>)}</div>
+      <h3>{sel.n}</h3>
+      <p class="role">{sel.role}</p>
+      <p class="when">{sel.d}</p>
+    </div>
+    <p class="txt">{sel.t}</p>
+    {sel.m.length ? <dl>{sel.m.map(([v, l]) => <div><dt>{l}</dt><dd>{v}</dd></div>)}</dl> : <p class="empty">{t.noNumbers}</p>}
+  </article>
+</div>
+
+<script type="application/json" id="map-data" set:html={JSON.stringify({ S, lines: t.lines, noNumbers: t.noNumbers, current: DEFAULT })}></script>
+
+<script>
+  type Data = {
+    S: Record<string, { n: string; d: string; lines: string[]; role: string; t: string; m: [string, string][] }>;
+    lines: Record<string, string>;
+    noNumbers: string;
+    current: string;
+  };
+  const data: Data = JSON.parse(document.getElementById('map-data')!.textContent || '{}');
+  const svg = document.querySelector<SVGSVGElement>('#map svg')!;
+  const strips = document.getElementById('strips')!;
+  const slot = document.getElementById('boardSlot')!;
+  const board = slot.querySelector<HTMLElement>('.board')!;
+  let current = data.current;
+  let lastStrip: HTMLElement | null = null;
+
+  const esc = (s: string) => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+  const chip = (k: string) => `<span class="chip ${k}"><span class="chip-t">${esc(data.lines[k])}</span></span>`;
+
+  function render(id: string) {
+    const s = data.S[id];
+    const m = s.m.length
+      ? '<dl>' + s.m.map(([v, l]) => `<div><dt>${esc(l)}</dt><dd>${esc(v)}</dd></div>`).join('') + '</dl>'
+      : `<p class="empty">${esc(data.noNumbers)}</p>`;
+    board.innerHTML = `<div><div class="lines">${s.lines.map(chip).join('')}</div><h3>${esc(s.n)}</h3><p class="role">${esc(s.role)}</p><p class="when">${esc(s.d)}</p></div><p class="txt">${esc(s.t)}</p>${m}`;
+  }
+
+  const mq = window.matchMedia('(max-width:900px)');
+  function place() {
+    if (mq.matches) {
+      const target = lastStrip && lastStrip.dataset.id === current ? lastStrip : strips.querySelector<HTMLElement>(`li[data-id="${current}"]`);
+      target?.appendChild(board);
+    } else {
+      slot.appendChild(board);
+    }
+  }
+
+  function select(id: string, fromLi: HTMLElement | null = null) {
+    current = id;
+    lastStrip = fromLi;
+    svg.querySelectorAll<SVGGElement>('.st').forEach((g) => {
+      const on = g.dataset.id === id;
+      g.classList.toggle('on', on);
+      g.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    const firstLi = strips.querySelector(`li[data-id="${id}"]`);
+    strips.querySelectorAll<HTMLElement>('li').forEach((li) => li.classList.toggle('on', li === (lastStrip || firstLi)));
+    strips.querySelectorAll<HTMLButtonElement>('.stop').forEach((b) =>
+      b.setAttribute('aria-expanded', (b.parentNode as HTMLElement).classList.contains('on') ? 'true' : 'false'));
+    render(id);
+    place();
+  }
+
+  svg.addEventListener('click', (e) => {
+    const g = (e.target as Element).closest<SVGGElement>('.st');
+    if (g?.dataset.id) select(g.dataset.id);
+  });
+  svg.addEventListener('keydown', (e) => {
+    const g = (e.target as Element).closest?.<SVGGElement>('.st');
+    if (g?.dataset.id && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); select(g.dataset.id); }
+  });
+  strips.addEventListener('click', (e) => {
+    const b = (e.target as Element).closest<HTMLButtonElement>('.stop');
+    if (b?.dataset.id) select(b.dataset.id, b.parentNode as HTMLElement);
+  });
+  mq.addEventListener('change', place);
+  select(current);
+</script>

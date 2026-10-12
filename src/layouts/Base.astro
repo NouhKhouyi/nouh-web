@@ -1,0 +1,78 @@
+---
+import '@fontsource/overpass/300.css';
+import '@fontsource/overpass/400.css';
+import '@fontsource/overpass/600.css';
+import '@fontsource/overpass/800.css';
+import '../styles/global.css';
+import { ui, SITE_URL, GITHUB, LINKEDIN, type Lang } from '../data/site';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const { lang, title = ui[lang].title, description = ui[lang].description, noindex = false } = Astro.props;
+const t = ui[lang];
+const path = Astro.url.pathname.replace(/^\/es(\/|$)/, '/');
+const enUrl = new URL(path, SITE_URL).href;
+const esUrl = new URL('/es' + (path === '/' ? '/' : path), SITE_URL).href;
+const canonical = lang === 'es' ? esUrl : enUrl;
+const ogImage = new URL('/og.png', SITE_URL).href;
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Nouh Khouyi Etbar',
+  url: SITE_URL,
+  image: new URL('/og.png', SITE_URL).href,
+  jobTitle: t.role,
+  worksFor: { '@type': 'Organization', name: 'GPTadvisor' },
+  alumniOf: [
+    { '@type': 'CollegeOrUniversity', name: 'Universitat Politècnica de València' },
+    { '@type': 'CollegeOrUniversity', name: 'IMT Atlantique' },
+  ],
+  address: { '@type': 'PostalAddress', addressLocality: 'València', addressCountry: 'ES' },
+  knowsLanguage: ['es', 'ar', 'ca', 'en', 'fr'],
+  sameAs: [GITHUB, LINKEDIN],
+};
+---
+
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="es" href={esUrl} />
+    <link rel="alternate" hreflang="x-default" href={enUrl} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#EDF1F4" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0A141D" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Nouh Khouyi Etbar" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_GB'} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(person)} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
